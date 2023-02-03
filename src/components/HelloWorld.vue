@@ -1,11 +1,69 @@
 <template>
-  <el-row>
-    <router-link to="/config">
-      <el-button>
-        去配置页面
-      </el-button>
-    </router-link>
-  </el-row>
+  <el-collapse @change="handleChange" accordion>
+    <el-collapse-item :index="String(index)" v-for="(client,index) in sourceNetWork" :key="index" :name="index">
+      <template slot="title">
+        {{client.config.name}}<i class="el-icon--right el-icon-info"></i>
+      </template>
+      <el-table :data="memberData" style="width: 100%">
+        <el-table-column type="expand">
+          <template slot-scope="props">
+            <el-form label-position="left" inline class="demo-table-expand">
+              <el-form-item label="id">
+                <span>{{ props.row.id }}</span>
+              </el-form-item>
+              <el-form-item label="设备名称">
+                <span>{{ props.row.name }}</span>
+              </el-form-item>
+              <el-form-item label="设备描述">
+                <span>{{ props.row.description }}</span>
+              </el-form-item>
+              <el-form-item label="ip">
+                <span>{{ props.row.config.ipAssignments }}</span>
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-table-column>
+        <el-table-column label="Auth" width="70">
+          <template slot-scope="scope">
+            <el-tooltip class="item" effect="dark" content="authorize member on network" placement="bottom">
+              <el-checkbox v-model="scope.row.config.authorized" @change="updateAuthorized(scope.$index, client.id, scope.row.config.id, scope.row.config.authorized)"></el-checkbox>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="设备名称"
+          prop="name">
+        </el-table-column>
+        <el-table-column
+          label="设备描述"
+          prop="description">
+        </el-table-column>
+          <el-table-column label="ip">
+            <template slot-scope="scope">{{ scope.row.config.ipAssignments }}</template>
+          </el-table-column>
+        <el-table-column label="状态" width="70">
+          <template slot-scope="scope">
+            <el-tag :type="scope.row.online ? 'success' : 'danger'">{{scope.row.online ? '在线' : '下线'}}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+          fixed="right"
+          label="操作"
+          width="120">
+          <template slot-scope="scope">
+            <el-button type="text" size="small">编辑</el-button>
+            <el-button @click.native.prevent="deleteRow(client.id, scope.$index, memberData)" type="text" size="small">移除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-collapse-item>
+  </el-collapse>
+<!--  <router-link to="/config">-->
+<!--    <el-button>-->
+<!--      去配置页面-->
+<!--    </el-button>-->
+<!--  </router-link>-->
+
 </template>
 
 <script>
@@ -13,11 +71,127 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
+      memberData: [],
+      sourceNetWork: [],
       msg: 'Welcome to Your Vue.js App'
     }
   },
   created () {
     // this.getAxios('/source/network/8bd5124fd6e9f450/member', null)
+    const token = this.getToken()
+    console.log('ddd:' + token)
+    if (token === '' || token === null) {
+      this.$router.push('/config')
+    } else {
+      this.getNetWorkList()
+    }
+  },
+  methods: {
+    getNetWorkList () {
+      this.getAxios('/source/network', null)
+        .then((data) => {
+          console.log(data.data)
+          this.sourceNetWork = data
+        }).catch((error) => {
+          this.error(error)
+        })
+    },
+    getMemberListByNetWorkId (netWorkId) {
+      this.getAxios('/source/network/' + netWorkId + '/member', null)
+        .then((data) => {
+          console.log(data.data)
+          this.memberData = data
+        }).catch((error) => {
+          this.error(error)
+        })
+    },
+    handleChange (val) {
+      if (val !== '') {
+        console.log(val)
+        console.log(this.sourceNetWork[val].id)
+        console.log(this.sourceNetWork[val].config.name)
+        console.log(this.sourceNetWork[val].description)
+        console.log(this.sourceNetWork[val].config.private)
+        this.getMemberListByNetWorkId(this.sourceNetWork[val].id)
+      }
+    },
+    deleteRow (netWorkId, memberIndex, rows) {
+      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.deleteRow('/source/network/' + netWorkId + '/member/' + rows.config.id)
+          .then((data) => {
+            console.log(data.data)
+            rows.splice(memberIndex, 1)
+            this.success('移除' + rows.name + '成功')
+          }).catch((error) => {
+            this.error(error)
+          })
+      }).catch(() => {
+      })
+    },
+    updateMember (networkId, memberId, item) {
+      // this.postAxios('/source/network/' + networkId + '/member/' + memberId, item)
+      //   .then((data) => {
+      //     console.log(data.data)
+      //
+      //   }).catch((error) => {
+      //   this.error(error)
+      // })
+    },
+    updateAuthorized (index, netWorkId, memberId, status) {
+      console.log(index)
+      console.log(netWorkId)
+      const memberObject = this.memberData[index]
+      memberObject.config.authorized = Boolean(status)
+      console.log(memberObject)
+      this.postAxios('/source/network/' + netWorkId + '/member/' + memberId, memberObject)
+        .then((data) => {
+          console.log(data.data)
+          const workName = this.sourceNetWork.filter(item => item.id === netWorkId)[0].config.name + '网络'
+          this.success((status ? '加入' : '退出') + workName)
+        }).catch((error) => {
+          this.error(error)
+        })
+    },
+    getToken () {
+      // eslint-disable-next-line no-undef
+      const token = utools.dbStorage.getItem('zeroTier_token')
+      console.log(token)
+      return token
+    },
+    success (message) {
+      this.$notify({
+        title: '成功',
+        message: message,
+        type: 'success',
+        duration: 3000
+      })
+    },
+    warning (message) {
+      this.$notify({
+        title: '警告',
+        message: message,
+        type: 'warning',
+        duration: 3000
+      })
+    },
+    info (message) {
+      this.$notify.info({
+        title: '消息',
+        message: message,
+        duration: 3000
+      })
+    },
+    error (message) {
+      this.$notify.error({
+        title: '错误',
+        message: message,
+        duration: 3000
+      })
+    }
   }
 }
 </script>
@@ -40,5 +214,24 @@ export default {
 
   a {
     color: #42b983;
+  }
+  .demo-table-expand {
+    font-size: 0;
+  }
+  .demo-table-expand label {
+    width: 90px;
+    color: #99a9bf;
+  }
+  .demo-table-expand .el-form-item {
+    margin-right: 0;
+    margin-bottom: 0;
+    width: 50%;
+  }
+  .el-table .warning-row {
+    background: oldlace;
+  }
+
+  .el-table .success-row {
+    background: #f0f9eb;
   }
 </style>

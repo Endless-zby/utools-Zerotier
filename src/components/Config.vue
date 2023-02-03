@@ -1,5 +1,8 @@
 <template>
   <div class="decrease" >
+    <div class="app">
+      <img src="../assets/logo.png">
+    </div>
     <el-input type="text" placeholder="请输入Token" style="width: 500px" prefix-icon="el-icon-view" v-model="token" ></el-input>
     <el-button type="primary" @click="saveToken" >保存</el-button>
     <el-divider></el-divider>
@@ -84,5 +87,12 @@ export default {
 }
 </script>
 <style>
-
+  .app {
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #2c3e50;
+    margin-top: 8px;
+  }
 </style>

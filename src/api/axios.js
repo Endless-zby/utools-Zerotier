@@ -1,5 +1,5 @@
 import axios from 'axios'
-import qs from 'qs'
+// import qs from 'qs'
 import { Loading } from 'element-ui'
 // 在config.js文件中统一存放一些公共常量，方便之后维护
 import { token } from './config.js'
@@ -7,6 +7,7 @@ import { token } from './config.js'
 let loadingInstance = null
 // 添加请求拦截器，在发送请求之前做些什么(**具体查看axios文档**)--------------------------------------------
 axios.interceptors.request.use(function (config) {
+  console.log('请求前获取token：' + token)
   config.headers.Authorization = 'token ' + token
   // 显示loading
   loadingInstance = Loading.service({fullscreen: true})
@@ -34,14 +35,13 @@ function errorState (response) {
   // 如果http状态码正常，则直接返回数据
   if (response && (response.status === 200 || response.status === 304 || response.status === 400)) {
     // 如果不需要除了data之外的数据，可以直接 return response.data
-    return response
   } else if (response.toString().endsWith('429') || response.toString().endsWith('514')) {
     // 频繁刷新
     response.errorInfo = '刷慢点'
   } else {
     console.log(response)
-    alert('数据获取错误')
   }
+  return response
 }
 
 // 封装axios--------------------------------------------------------------------------------------
@@ -52,9 +52,9 @@ function apiAxios (method, url, params) {
     // `params` 是即将与请求一起发送的 URL 参数
     // `data` 是作为请求主体被发送的数据
     params: method === 'GET' || method === 'DELETE' ? params : null,
-    data: method === 'POST' || method === 'PUT' ? qs.stringify(params) : null,
+    data: method === 'POST' || method === 'PUT' ? params : null,
     headers: {'Content-Type': 'application/json'},
-    timeout: 10000
+    timeout: 6000
   }
 
   // 注意**Promise**使用(Promise首字母大写)
