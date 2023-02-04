@@ -51,12 +51,39 @@
           label="操作"
           width="120">
           <template slot-scope="scope">
-            <el-button type="text" size="small">编辑</el-button>
-            <el-button @click.native.prevent="deleteRow(client.id, scope.$index, memberData)" type="text" size="small">移除</el-button>
+            <el-button type="text" @click="openUpdateFrom(scope.$index)" size="small">编辑</el-button>
+            <el-button @click.native.prevent="deleteRow(client.id, scope.$index)" type="text" size="small">移除</el-button>
           </template>
         </el-table-column>
       </el-table>
     </el-collapse-item>
+    <!-- Form -->
+    <el-dialog title="编辑member" :visible.sync="dialogFormVisible">
+      <el-form :model="memberForm" :rules="rules" ref="memberForm" label-width="100px" size="mini" label-position="left">
+        <el-form-item label="设备名称" prop="name">
+          <el-input v-model="memberForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="设备描述" prop="description">
+          <el-input type="textarea" v-model="memberForm.description"></el-input>
+        </el-form-item>
+        <el-form-item label="是否可见" prop="hidden">
+          <el-switch v-model="memberForm.hidden"></el-switch>
+        </el-form-item>
+        <el-form-item v-for="(domain, index) in memberForm.config.ipAssignments" prop="ipAssignments" label="IP" :key="index"
+          :rules="{
+      message: 'IP不能为空', trigger: 'blur'
+    }"
+        >
+          <el-input type="text" style="width: 195px" v-model="memberForm.config.ipAssignments[index]" ></el-input>
+          <el-button @click.prevent="removeDomain(index)">删除</el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="submitForm('memberForm')">立即创建</el-button>
+          <el-button @click="addDomain">新增IP</el-button>
+          <el-button @click="resetForm('memberForm')">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </el-collapse>
 <!--  <router-link to="/config">-->
 <!--    <el-button>-->
@@ -73,7 +100,23 @@ export default {
     return {
       memberData: [],
       sourceNetWork: [],
-      msg: 'Welcome to Your Vue.js App'
+      msg: 'Welcome to Your Vue.js App',
+      dialogFormVisible: false,
+      memberForm: {
+        name: '',
+        description: '',
+        hidden: true,
+        config: {
+          ipAssignments: ['155.155.155.155', '255.255.255.255'],
+          noAutoAssignIps: false
+        }
+      },
+      rules: {
+        name: [
+          { message: '请输入设备名称', trigger: 'blur' }
+        ]
+      },
+      formLabelWidth: '120px'
     }
   },
   created () {
@@ -87,6 +130,40 @@ export default {
     }
   },
   methods: {
+    removeDomain (item) {
+      console.log('删除：' + item)
+      if (item !== -1) {
+        this.memberForm.config.ipAssignments.splice(item, 1)
+      }
+    },
+    addDomain () {
+      this.memberForm.config.ipAssignments.push('')
+    },
+    submitForm (formName) {
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          console.log(this.memberForm)
+          this.success('test')
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
+    },
+    openUpdateFrom (memberId) {
+      this.memberForm.name = this.memberData[memberId].name
+      this.memberForm.description = this.memberData[memberId].description
+      this.memberForm.hidden = this.memberData[memberId].hidden
+      this.memberForm.config.ipAssignments = this.memberData[memberId].config.ipAssignments
+      this.memberForm.config.noAutoAssignIps = this.memberData[memberId].config.noAutoAssignIps
+      this.dialogFormVisible = true
+    },
+    resetForm (formName) {
+      this.$refs[formName].resetFields()
+      // this.memberForm = this.$options.data().form
+      // this.$refs[formName].resetFields()
+      console.log('重置')
+    },
     getNetWorkList () {
       this.getAxios('/source/network', null)
         .then((data) => {
@@ -115,17 +192,20 @@ export default {
         this.getMemberListByNetWorkId(this.sourceNetWork[val].id)
       }
     },
-    deleteRow (netWorkId, memberIndex, rows) {
-      this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+    deleteRow (netWorkId, memberIndex) {
+      console.log('删除的index：' + memberIndex)
+      const memberId = this.memberData[memberIndex].config.id
+      const memberName = this.memberData[memberIndex].name
+      this.$confirm('是否删除设备[' + memberName + ']?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        this.deleteRow('/source/network/' + netWorkId + '/member/' + rows.config.id)
+        this.deleteAxios('/source/network/' + netWorkId + '/member/' + memberId)
           .then((data) => {
             console.log(data.data)
-            rows.splice(memberIndex, 1)
-            this.success('移除' + rows.name + '成功')
+            this.memberData.splice(memberIndex, 1)
+            this.success('设备[' + memberName + ']已移除')
           }).catch((error) => {
             this.error(error)
           })

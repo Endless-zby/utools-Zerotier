@@ -79,6 +79,6 @@ export default {
     Vue.prototype.getAxios = (url, params) => apiAxios('GET', url, params)
     Vue.prototype.postAxios = (url, params) => apiAxios('POST', url, params)
     Vue.prototype.putAxios = (url, params) => apiAxios('PUT', url, params)
-    Vue.prototype.delectAxios = (url, params) => apiAxios('DELECT', url, params)
+    Vue.prototype.deleteAxios = (url, params) => apiAxios('DELETE', url, params)
   }
 }
