@@ -58,7 +58,7 @@
       </el-table>
     </el-collapse-item>
     <!-- Form -->
-    <el-dialog title="编辑member" :visible.sync="dialogFormVisible">
+    <el-dialog title="编辑member" :visible.sync="dialogFormVisible" @closed="afterClose">
       <el-form :model="memberForm" :rules="rules" ref="memberForm" label-width="100px" size="mini" label-position="left">
         <el-form-item label="设备名称" prop="name">
           <el-input v-model="memberForm.name"></el-input>
@@ -66,7 +66,7 @@
         <el-form-item label="设备描述" prop="description">
           <el-input type="textarea" v-model="memberForm.description"></el-input>
         </el-form-item>
-        <el-form-item label="是否可见" prop="hidden">
+        <el-form-item label="不可见" prop="hidden">
           <el-switch v-model="memberForm.hidden"></el-switch>
         </el-form-item>
         <el-form-item v-for="(domain, index) in memberForm.config.ipAssignments" prop="ipAssignments" label="IP" :key="index"
@@ -78,9 +78,8 @@
           <el-button @click.prevent="removeDomain(index)">删除</el-button>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitForm('memberForm')">立即创建</el-button>
+          <el-button type="primary" @click="submitForm('memberForm')">修改</el-button>
           <el-button @click="addDomain">新增IP</el-button>
-          <el-button @click="resetForm('memberForm')">重置</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -103,11 +102,12 @@ export default {
       msg: 'Welcome to Your Vue.js App',
       dialogFormVisible: false,
       memberForm: {
+        index: '',
         name: '',
         description: '',
         hidden: true,
         config: {
-          ipAssignments: ['155.155.155.155', '255.255.255.255'],
+          ipAssignments: [],
           noAutoAssignIps: false
         }
       },
@@ -143,31 +143,39 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           console.log(this.memberForm)
-          this.success('test')
+          const netWorkId = this.memberData[this.memberForm.index].networkId
+          const memberId = this.memberData[this.memberForm.index].config.id
+          this.postAxios('/source/network/' + netWorkId + '/member/' + memberId, this.memberForm)
+            .then((data) => {
+              console.log('修改后返回参数 ： ' + data)
+              this.memberData[this.memberForm.index] = data
+              this.success('修改成功')
+            }).catch((error) => {
+              this.error(error)
+            })
+          this.dialogFormVisible = false
         } else {
           console.log('error submit!!')
           return false
         }
       })
     },
-    openUpdateFrom (memberId) {
-      this.memberForm.name = this.memberData[memberId].name
-      this.memberForm.description = this.memberData[memberId].description
-      this.memberForm.hidden = this.memberData[memberId].hidden
-      this.memberForm.config.ipAssignments = this.memberData[memberId].config.ipAssignments
-      this.memberForm.config.noAutoAssignIps = this.memberData[memberId].config.noAutoAssignIps
-      this.dialogFormVisible = true
+    afterClose () {
+      console.log('afterClose')
     },
-    resetForm (formName) {
-      this.$refs[formName].resetFields()
-      // this.memberForm = this.$options.data().form
-      // this.$refs[formName].resetFields()
-      console.log('重置')
+    openUpdateFrom (index) {
+      this.memberForm.index = index
+      this.memberForm.name = this.memberData[index].name
+      this.memberForm.description = this.memberData[index].description
+      this.memberForm.hidden = this.memberData[index].hidden
+      this.memberForm.config.ipAssignments = this.memberData[index].config.ipAssignments
+      this.memberForm.config.noAutoAssignIps = this.memberData[index].config.noAutoAssignIps
+      this.dialogFormVisible = true
     },
     getNetWorkList () {
       this.getAxios('/source/network', null)
         .then((data) => {
-          console.log(data.data)
+          console.log(data)
           this.sourceNetWork = data
         }).catch((error) => {
           this.error(error)
@@ -176,7 +184,7 @@ export default {
     getMemberListByNetWorkId (netWorkId) {
       this.getAxios('/source/network/' + netWorkId + '/member', null)
         .then((data) => {
-          console.log(data.data)
+          console.log(data)
           this.memberData = data
         }).catch((error) => {
           this.error(error)
@@ -203,7 +211,7 @@ export default {
       }).then(() => {
         this.deleteAxios('/source/network/' + netWorkId + '/member/' + memberId)
           .then((data) => {
-            console.log(data.data)
+            console.log(data)
             this.memberData.splice(memberIndex, 1)
             this.success('设备[' + memberName + ']已移除')
           }).catch((error) => {
@@ -229,7 +237,7 @@ export default {
       console.log(memberObject)
       this.postAxios('/source/network/' + netWorkId + '/member/' + memberId, memberObject)
         .then((data) => {
-          console.log(data.data)
+          console.log(data)
           const workName = this.sourceNetWork.filter(item => item.id === netWorkId)[0].config.name + '网络'
           this.success((status ? '加入' : '退出') + workName)
         }).catch((error) => {
