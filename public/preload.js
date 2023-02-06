@@ -1,1 +1,1 @@
-console.log("preload js loaded")
+console.log('preload js loaded')

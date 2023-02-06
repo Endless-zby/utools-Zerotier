@@ -2,13 +2,15 @@ import axios from 'axios'
 // import qs from 'qs'
 import { Loading } from 'element-ui'
 // 在config.js文件中统一存放一些公共常量，方便之后维护
-import { token } from './config.js'
+// import { token } from './config.js'
 
 let loadingInstance = null
 // 添加请求拦截器，在发送请求之前做些什么(**具体查看axios文档**)--------------------------------------------
 axios.interceptors.request.use(function (config) {
-  console.log('请求前获取token：' + token)
-  config.headers.Authorization = 'token ' + token
+  // eslint-disable-next-line no-undef
+  console.log('请求前获取token：' + utools.dbStorage.getItem('zeroTier_token'))
+  // eslint-disable-next-line no-undef
+  config.headers.Authorization = 'token ' + utools.dbStorage.getItem('zeroTier_token')
   // 显示loading
   loadingInstance = Loading.service({fullscreen: true})
   return config

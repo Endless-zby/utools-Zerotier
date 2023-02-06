@@ -1,22 +1,12 @@
-# utools-zerotier
+## ZeroTier
 
-> A Vue.js project
+> Securely Connect Any Device,Anywhere
 
-## Build Setup
+官网：`https://www.zerotier.com/`
 
-``` bash
-# install dependencies
-npm install
 
-# serve with hot reload at localhost:8080
-npm run dev
+- ZeroTier结合了VPN和SD-广域网的功能，简化了网络管理。
+- ZeroTier的零信任网络解决方案通过256位端到端加密提供可扩展的安全性。
+- 端到端访问，网络带宽不受限
 
-# build for production with minification
-npm run build
 
-# build for production and view the bundle analyzer report
-npm run build --report
-```
-
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
-"# utools-Zerotier" 
