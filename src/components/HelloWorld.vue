@@ -3,8 +3,13 @@
 <!--    <el-header>-->
 <!--      <div class="demo-basic&#45;&#45;circle">-->
 <!--        <div class="block" >-->
-<!--          <el-avatar size="large" src='https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'></el-avatar>-->
+<!--&lt;!&ndash;          <el-avatar size="large" src='https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'></el-avatar>&ndash;&gt;-->
 <!--        </div>-->
+<!--        <router-link to="/config">-->
+<!--          <el-button>-->
+<!--            去配置页面-->
+<!--          </el-button>-->
+<!--        </router-link>-->
 <!--      </div>-->
 <!--    </el-header>-->
     <el-main>
@@ -96,13 +101,20 @@
         </el-dialog>
       </el-collapse>
     </el-main>
+    <el-divider></el-divider>
+    <el-footer>
+      <div class="demo-basic--circle">
+        <div class="block" >
+          <!--          <el-avatar size="large" src='https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'></el-avatar>-->
+        </div>
+        <router-link to="/config">
+          <el-button>
+            去配置页面
+          </el-button>
+        </router-link>
+      </div>
+    </el-footer>
   </el-container>
-<!--  <router-link to="/config">-->
-<!--    <el-button>-->
-<!--      去配置页面-->
-<!--    </el-button>-->
-<!--  </router-link>-->
-
 </template>
 
 <script>
@@ -308,7 +320,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
   .el-header, .el-footer {
-    background-color: #a4adaf;
+    background-color: #ffffff;
     color: #333;
     text-align: center;
     line-height: 60px;
