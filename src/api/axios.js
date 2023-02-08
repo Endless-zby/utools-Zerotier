@@ -16,6 +16,7 @@ axios.interceptors.request.use(function (config) {
   return config
 }, function (error) {
   // 请求错误时弹框提示，或做些其他事
+  console.log('error : ' + error)
   return Promise.reject(error)
 })
 
@@ -23,11 +24,13 @@ axios.interceptors.request.use(function (config) {
 axios.interceptors.response.use(function (response) {
   // 对响应数据做点什么，允许在数据返回客户端前，修改响应的数据
   // 如果只需要返回体中数据，则如下，如果需要全部，则 return response 即可
+  console.log('filter : ' + response)
   loadingInstance.close()
   return response.data
 }, function (error) {
   loadingInstance.close()
   // 对响应错误做点什么
+  console.log('filter error : ' + error)
   return Promise.reject(error)
 })
 
@@ -35,15 +38,17 @@ axios.interceptors.response.use(function (response) {
 function errorState (response) {
   // 隐藏loading
   // 如果http状态码正常，则直接返回数据
-  if (response && (response.status === 200 || response.status === 304 || response.status === 400)) {
+  console.log('error : ' + response.response.message)
+  if (response.response && (response.response.status === 200 || response.response.status === 304 || response.response.status === 400)) {
     // 如果不需要除了data之外的数据，可以直接 return response.data
-  } else if (response.toString().endsWith('429') || response.toString().endsWith('514')) {
+  } else if (response.response.status === 429 || response.response.status === 514) {
     // 频繁刷新
-    response.errorInfo = '刷慢点'
-  } else {
-    console.log(response)
+    response.response.message = '刷慢点'
+  } else if (response.response.status === 401 || response.response.status === 403) {
+    response.response.message = 'token失效或被拒绝'
   }
-  return response
+  console.log(response.response)
+  return response.response
 }
 
 // 封装axios--------------------------------------------------------------------------------------
@@ -65,6 +70,7 @@ function apiAxios (method, url, params) {
     axios(httpDefault)
       // 此处的.then属于axios
       .then((res) => {
+        console.log('success : ' + res)
         // successState(res)
         resolve(res)
       }).catch((response) => {

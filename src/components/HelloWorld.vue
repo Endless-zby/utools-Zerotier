@@ -180,7 +180,7 @@ export default {
               this.memberData[this.memberForm.index] = data
               this.success('修改成功')
             }).catch((error) => {
-              this.error(error)
+              this.error(error.response.message)
             })
           this.dialogFormVisible = false
         } else {
@@ -208,7 +208,8 @@ export default {
           console.log(data)
           this.sourceNetWork = data
         }).catch((error) => {
-          this.error(error)
+          console.log('list: ' + error.response)
+          this.error(error.response.message)
         })
     },
     getMemberListByNetWorkId (netWorkId) {
@@ -218,7 +219,7 @@ export default {
           console.log(data)
           this.memberData = data
         }).catch((error) => {
-          this.error(error)
+          this.error(error.response.message)
         })
     },
     handleChange (val) {
@@ -247,7 +248,7 @@ export default {
             this.memberData.splice(memberIndex, 1)
             this.success('设备[' + memberName + ']已移除')
           }).catch((error) => {
-            this.error(error)
+            this.error(error.response.message)
           })
       }).catch(() => {
       })
@@ -274,7 +275,7 @@ export default {
           const workName = this.sourceNetWork.filter(item => item.id === netWorkId)[0].config.name + '网络'
           this.success((status ? '加入' : '退出') + workName)
         }).catch((error) => {
-          this.error(error)
+          this.error(error.response.message)
         })
     },
     getToken () {
