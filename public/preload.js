@@ -2,7 +2,7 @@ console.log('preload js loaded')
 // preload.js 中使用 nodejs
 const axios = require('axios')
 const { readFileSync } = require('fs')
-const childProcess = require('child_process') // nodeJS 自带
+const childProcess = require('child_process')
 const exec = childProcess.exec
 
 window.serverStatus = axios.create({
