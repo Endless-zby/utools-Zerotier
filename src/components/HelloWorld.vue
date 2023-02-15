@@ -1,17 +1,13 @@
 <template>
   <el-container>
-<!--    <el-header>-->
-<!--      <div class="demo-basic&#45;&#45;circle">-->
-<!--        <div class="block" >-->
-<!--&lt;!&ndash;          <el-avatar size="large" src='https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'></el-avatar>&ndash;&gt;-->
-<!--        </div>-->
-<!--        <router-link to="/config">-->
-<!--          <el-button>-->
-<!--            去配置页面-->
-<!--          </el-button>-->
-<!--        </router-link>-->
-<!--      </div>-->
-<!--    </el-header>-->
+    <el-header>
+      本地服务状态：<el-switch
+        active-color="#13ce66"
+        inactive-color="#ff4949"
+        v-model="serverConfig.status"
+        disabled>
+      </el-switch>
+    </el-header>
     <el-main>
       <el-collapse @change="handleChange" accordion>
         <div slot="header">
@@ -156,10 +152,11 @@ export default {
     } else {
       this.getNetWorkList()
     }
-    this.serverStatus()
+    // this.serverStatus()
     this.localServerStatus()
   },
   methods: {
+    // 进程判断服务状态
     localServerStatus () {
       window.viewProcessMessage('zerotier-one_x64')
       // eslint-disable-next-line no-undef
@@ -169,6 +166,7 @@ export default {
         this.serverConfig.status = status
       }
     },
+    // 接口判断服务状态
     async serverStatus () {
       try {
         let res = await window.serverStatus.get(`network`)
