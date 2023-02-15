@@ -153,8 +153,26 @@ export default {
     } else {
       this.getNetWorkList()
     }
+    this.serverStatus()
   },
   methods: {
+    async serverStatus () {
+      try {
+        let res = await window.serverStatus.get(`network`)
+        const serverConfig = JSON.parse(JSON.stringify(res))
+        console.log('ssss:' + serverConfig)
+        console.log('ssss:' + serverConfig.status)
+        console.log('ssss:' + serverConfig.statusText)
+        console.log('ssss:' + serverConfig.data.length)
+        if (serverConfig.status === 200) {
+        } else {
+          this.info(serverConfig.status)
+        }
+      } catch (ex) {
+        this.info('当前设备zerotier one 未启动')
+      }
+      // console.log('ssss:' + res)
+    },
     removeDomain (item) {
       console.log('删除：' + item)
       if (item !== -1) {
