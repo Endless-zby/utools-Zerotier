@@ -137,6 +137,9 @@ export default {
           noAutoAssignIps: false
         }
       },
+      serverConfig: {
+        status: false
+      },
       rules: {
         name: [
           { message: '请输入设备名称', trigger: 'blur' }
@@ -154,17 +157,33 @@ export default {
       this.getNetWorkList()
     }
     this.serverStatus()
+    this.localServerStatus()
   },
   methods: {
+    localServerStatus () {
+      window.viewProcessMessage('zerotier-one_x64')
+      // eslint-disable-next-line no-undef
+      const status = utools.dbStorage.getItem('zeroTier_server_status')
+      console.log('status: ' + status)
+      if (status !== '' && status !== null) {
+        this.serverConfig.status = status
+      }
+    },
     async serverStatus () {
       try {
         let res = await window.serverStatus.get(`network`)
         const serverConfig = JSON.parse(JSON.stringify(res))
-        console.log('ssss:' + serverConfig)
-        console.log('ssss:' + serverConfig.status)
-        console.log('ssss:' + serverConfig.statusText)
-        console.log('ssss:' + serverConfig.data.length)
+        // console.log('ssss:' + JSON.stringify(res))
+        // console.log('ssss:' + serverConfig)
+        // console.log('ssss:' + serverConfig.status)
+        // console.log('ssss:' + serverConfig.statusText)
+        // console.log('ssss:' + serverConfig.data.length)
         if (serverConfig.status === 200) {
+          if (serverConfig.data[0].status === 'OK') {
+            this.success('当前设备zerotier one 已启动')
+          } else {
+            this.info(serverConfig.data[0].status)
+          }
         } else {
           this.info(serverConfig.status)
         }
