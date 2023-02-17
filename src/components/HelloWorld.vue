@@ -3,7 +3,7 @@
     <el-header>
       本地服务状态：<el-switch
         active-color="#13ce66"
-        inactive-color="#ff4949"
+        inactive-color="#aea4a7"
         v-model="serverConfig.status"
         disabled>
       </el-switch>
