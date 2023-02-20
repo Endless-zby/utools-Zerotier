@@ -29,11 +29,12 @@ window.viewProcessMessage = (idname) => {
     if (err) {
       return console.error(err)
     }
+    utools.dbStorage.setItem('zeroTier_server_status', false)
     stdout.split('\n').forEach((line) => {
       let processMessage = line.trim().split(/\s+/)
       // processMessage[0]进程名称 ， processMessage[1]进程id
       let processName = processMessage[0]
-      // console.log('进程id: ' + processMessage[1] + ', 进程名称: ' + processName)
+      console.log('进程id: ' + processMessage[1] + ', 进程名称: ' + processName)
       // console.log('---------------------------------' + String(processName).includes('zerotier'))
       if (String(processName).includes(idname)) {
         utools.dbStorage.setItem('zeroTier_server_status', true)
