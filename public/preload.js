@@ -1,9 +1,14 @@
-console.log('preload js loaded')
-// preload.js 中使用 nodejs
+// alert('preload js loaded')
+// console.log('版本：' + utools.getAppVersion())
+// utools.getAppVersion() < '2.6.1' && alert('请升级 uTools 至最新版本')
 const axios = require('axios')
 const { readFileSync } = require('fs')
 const childProcess = require('child_process')
 const exec = childProcess.exec
+
+window.readServerToken = (filePath) => {
+  return readFileSync(filePath)
+}
 
 window.serverStatus = axios.create({
   baseURL: utools.dbStorage.getItem('zeroTier_server_baseUrl'),
@@ -13,10 +18,6 @@ window.serverStatus = axios.create({
     'X-ZT1-Auth': utools.dbStorage.getItem('zeroTier_server_token')
   }
 })
-
-window.readServerToken = (filePath) => {
-  return readFileSync(filePath)
-}
 
 window.viewProcessMessage = (idname) => {
   // process 不用引入，nodeJS 自带

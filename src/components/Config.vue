@@ -83,13 +83,17 @@ export default {
       } else if (utools.isMacOs()) {
         filePath = this.configPath.macConfig
       }
-      const sss = window.readServerToken(filePath)
-      console.log('文件中的serverToken:' + String(sss))
-      if (sss !== '' || sss.length !== 0) {
-        this.serverToken = String(sss)
-        this.success('配置文件读取成功')
-      } else {
-        this.error('配置文件获取失败，检查权限或手动输入')
+      try {
+        const serverToken = window.readServerToken(filePath)
+        console.log('文件中的serverToken:' + String(serverToken))
+        if (serverToken !== '' && serverToken.length !== 0) {
+          this.serverToken = String(serverToken)
+          this.success('配置文件读取成功')
+        } else {
+          this.error('配置文件获取失败，检查权限或手动输入')
+        }
+      } catch (e) {
+        this.error(e)
       }
     },
     saveServerBaseUrl () {
