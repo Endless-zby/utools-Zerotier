@@ -52,7 +52,7 @@ function errorState (response) {
 }
 
 // 封装axios--------------------------------------------------------------------------------------
-function apiAxios (method, url, params) {
+function apiAxios (method, url, params, accessToken) {
   let httpDefault = {
     method: method,
     url: url,
@@ -60,7 +60,7 @@ function apiAxios (method, url, params) {
     // `data` 是作为请求主体被发送的数据
     params: method === 'GET' || method === 'DELETE' ? params : null,
     data: method === 'POST' || method === 'PUT' ? params : null,
-    headers: {'Content-Type': 'application/json'},
+    headers: accessToken === '' ? {'Content-Type': 'application/json'} : {'Content-Type': 'application/json', 'X-ZT1-Auth': accessToken},
     timeout: 6000
   }
 
@@ -84,9 +84,9 @@ function apiAxios (method, url, params) {
 // Vue.js的插件应当有一个公开方法 install。这个方法的第一个参数是 Vue 构造器，第二个参数是一个可选的选项对象。
 export default {
   install: function (Vue) {
-    Vue.prototype.getAxios = (url, params) => apiAxios('GET', url, params)
-    Vue.prototype.postAxios = (url, params) => apiAxios('POST', url, params)
-    Vue.prototype.putAxios = (url, params) => apiAxios('PUT', url, params)
-    Vue.prototype.deleteAxios = (url, params) => apiAxios('DELETE', url, params)
+    Vue.prototype.getAxios = (url, params, accessToken) => apiAxios('GET', url, params, accessToken)
+    Vue.prototype.postAxios = (url, params, accessToken) => apiAxios('POST', url, params, accessToken)
+    Vue.prototype.putAxios = (url, params, accessToken) => apiAxios('PUT', url, params, accessToken)
+    Vue.prototype.deleteAxios = (url, params, accessToken) => apiAxios('DELETE', url, params, accessToken)
   }
 }

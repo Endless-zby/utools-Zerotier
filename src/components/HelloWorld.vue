@@ -115,6 +115,7 @@
 
 <script>
 import { parseTime } from '../utils/date.js'
+import clientAxios from 'axios'
 export default {
   name: 'HelloWorld',
   data () {
@@ -169,7 +170,17 @@ export default {
     // 接口判断服务状态
     async serverStatus () {
       try {
-        let res = await window.serverStatus.get(`network`)
+        clientAxios.create({
+          // eslint-disable-next-line no-undef
+          baseURL: utools.dbStorage.getItem('zeroTier_server_baseUrl'),
+          headers: {
+            'Content-Type': 'application/json',
+            // 只读权限
+            // eslint-disable-next-line no-undef
+            'X-ZT1-Auth': utools.dbStorage.getItem('zeroTier_server_token')
+          }
+        })
+        let res = await clientAxios.get(`network`)
         const serverConfig = JSON.parse(JSON.stringify(res))
         // console.log('ssss:' + JSON.stringify(res))
         // console.log('ssss:' + serverConfig)
